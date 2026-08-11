@@ -1,7 +1,47 @@
 import { useState, useEffect, useCallback } from 'react'
 import './App.css'
+import { account } from './appwrite'
+import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
+import Bookings from './bookings';
 
-function App() {
+//Authentication login logout
+const handleGoogleLogin = () => {
+  account.createOAuth2Session(
+    'google',
+    window.location.origin,
+    `${window.location.origin}/`
+  )
+}
+const handleLogout = async () => {
+  try {
+    await account.deleteSession({
+      sessionId: 'current'
+    });
+
+    setUser(null);
+  } catch (error) {
+    console.error('Logout failed:', error);
+  }
+};
+
+function Home() {
+
+  const [user, setUser] = useState(null)
+
+  useEffect(() => {
+    const getCurrentUser = async () => {
+      try {
+        const currentUser = await account.get()
+        setUser(currentUser)
+      } catch (error) {
+        setUser(null)
+      }
+    }
+
+    getCurrentUser()
+  }, [])
+
+
   // Search state
   const [numBeds, setNumBeds] = useState('')
   const [listings, setListings] = useState([])
@@ -69,6 +109,7 @@ function App() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
+          userId: user.$id,
           startDate: checkIn,
           endDate: checkOut
         })
@@ -106,11 +147,34 @@ function App() {
   return (
     <div className="app">
       <header className="header">
-        <div className="header-overlay"></div>
-        <div className="header-content">
-          <h1>HotelBooker</h1>
-          <p>Find & book exclusive boutique accommodations instantly</p>
-        </div>
+        <h1>HotelBooker</h1>
+
+        {user ? (
+          <p>Hi, {user.name}!</p>
+        ) : (
+          <p>Find & book AirBnB accommodations instantly</p>
+        )}
+        {user && (
+          <Link to="/bookings">
+            My Bookings
+          </Link>
+        )}
+
+        {user ? (
+          <button
+            onClick={handleLogout}
+            className="google-login-btn"
+          >
+            Log Out
+          </button>
+        ) : (
+          <button
+            onClick={handleGoogleLogin}
+            className="google-login-btn"
+          >
+            Continue with Google
+          </button>
+        )}
       </header>
 
       <main className="container">
@@ -190,10 +254,17 @@ function App() {
                           <span className="price-unit">/ night</span>
                         </div>
                         <button
-                          onClick={() => setSelectedListing(listing)}
+                          onClick={() => {
+                            if (!user) {
+                              handleGoogleLogin(); //only let it through if logged in
+                              return;
+                            }
+
+                            setSelectedListing(listing);
+                          }}
                           className="book-trigger-btn"
                         >
-                          Book Stay
+                          {user ? 'Book Stay' : 'Sign in to Book'}
                         </button>
                       </div>
                     </div>
@@ -210,7 +281,7 @@ function App() {
         <div className="modal-backdrop">
           <div className="modal-card">
             <button className="modal-close-btn" onClick={handleCloseBooking}>&times;</button>
-            
+
             {!bookingSuccess ? (
               <>
                 <div className="modal-header">
@@ -287,7 +358,7 @@ function App() {
                 <p className="success-message">
                   Thank you for booking with HotelBooker. Your reservation has been saved in our system.
                 </p>
-                
+
                 <div className="success-details-card">
                   <h4>{bookingSuccess.listingName}</h4>
                   <div className="details-grid">
@@ -314,4 +385,15 @@ function App() {
   )
 }
 
-export default App
+function App() {
+  return (
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<Home />} />
+        <Route path="/bookings" element={<Bookings />} />
+      </Routes>
+    </BrowserRouter>
+  );
+}
+
+export default App;

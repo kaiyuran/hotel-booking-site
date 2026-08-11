@@ -1,0 +1,103 @@
+.bookings-page {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 40px 20px;
+    color: white;
+}
+
+.bookings-page h1 {
+    margin-bottom: 8px;
+    color: white;
+}
+
+.bookings-list {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    margin-top: 30px;
+}
+
+.booking-card {
+    display: flex;
+    overflow: hidden;
+    border: 1px solid #333;
+    border-radius: 16px;
+    background: #111;
+    color: white;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
+}
+
+.booking-image {
+    width: 280px;
+    height: 220px;
+    object-fit: cover;
+}
+
+.booking-info {
+    padding: 22px;
+    flex: 1;
+}
+
+.booking-info h2 {
+    margin: 0 0 6px;
+    color: white;
+}
+
+.location {
+    color: #fff;
+    margin-top: 0;
+}
+
+.price {
+    color: #fff;
+    font-weight: bold;
+    margin-top: 16px;
+}
+
+.booking-dates {
+    display: flex;
+    gap: 40px;
+    margin-top: 22px;
+    padding-top: 18px;
+    border-top: 1px solid #333;
+}
+
+.booking-dates div {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.booking-dates span {
+    font-size: 12px;
+    color: #fff;
+}
+
+.booking-status {
+    margin-top: 20px;
+    color: white;
+}
+
+.empty-bookings {
+    margin-top: 40px;
+    padding: 50px;
+    text-align: center;
+    border: 1px solid #333;
+    border-radius: 16px;
+    color: white;
+}
+
+@media (max-width: 700px) {
+    .booking-card {
+        flex-direction: column;
+    }
+
+    .booking-image {
+        width: 100%;
+        height: 220px;
+    }
+
+    .booking-dates {
+        gap: 25px;
+    }
+}

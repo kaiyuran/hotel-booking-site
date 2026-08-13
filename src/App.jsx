@@ -4,35 +4,40 @@ import { account } from './appwrite'
 import { BrowserRouter, Routes, Route, Link } from 'react-router-dom';
 import Bookings from './bookings';
 
-//Authentication login logout
-const handleGoogleLogin = () => {
-  account.createOAuth2Session(
-    'google',
-    window.location.origin,
-    `${window.location.origin}/`
-  )
-}
-const handleLogout = async () => {
-  try {
-    await account.deleteSession({
-      sessionId: 'current'
-    });
-
-    setUser(null);
-  } catch (error) {
-    console.error('Logout failed:', error);
-  }
-};
-
 function Home() {
 
   const [user, setUser] = useState(null)
+
+  //Authentication login logout
+  const handleGoogleLogin = () => {
+    account.createOAuth2Session(
+      'google',
+      window.location.origin,
+      `${window.location.origin}/`
+    )
+  }
+
+  const handleLogout = async () => {
+    try {
+      await account.deleteSession({
+        sessionId: 'current'
+      });
+
+      setUser(null);
+    } catch (error) {
+      console.error('Logout failed:', error);
+    }
+  };
 
   useEffect(() => {
     const getCurrentUser = async () => {
       try {
         const currentUser = await account.get()
         setUser(currentUser)
+        const jwtResponse = await account.createJWT();
+
+        const jwt = jwtResponse.jwt;
+
       } catch (error) {
         setUser(null)
       }
@@ -103,13 +108,15 @@ function Home() {
     setBookingError('');
 
     try {
+      const jwtResponse = await account.createJWT();
+
       const res = await fetch(`/api/listings/${selectedListing._id}/book`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${jwtResponse.jwt}`
         },
         body: JSON.stringify({
-          userId: user.$id,
           startDate: checkIn,
           endDate: checkOut
         })

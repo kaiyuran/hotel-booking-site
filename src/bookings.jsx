@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { account } from './appwrite';
 import './bookings.css';
 
@@ -14,10 +15,14 @@ function Bookings() {
             try {
                 const currentUser = await account.get();
                 setUser(currentUser);
+                const jwtResponse = await account.createJWT();
 
-                const res = await fetch(
-                    `/api/bookings/${currentUser.$id}`
-                );
+                const jwt = jwtResponse.jwt;
+                const res = await fetch(`/api/bookings`, {
+                    headers: {
+                        Authorization: `Bearer ${jwt}`
+                    }
+                });
 
                 if (!res.ok) {
                     throw new Error('Failed to fetch bookings');
@@ -29,9 +34,7 @@ function Bookings() {
                 // Fetch the listing for each booking
                 const listingResults = await Promise.all(
                     data.map(async (booking) => {
-                        const listingRes = await fetch(
-                            `/api/listings/${booking.listingId}`
-                        );
+                        const listingRes = await fetch(`/api/listings/${booking.listingId}`);
 
                         if (!listingRes.ok) {
                             return null;
@@ -68,6 +71,9 @@ function Bookings() {
         return (
             <div className="bookings-page">
                 <h1>My Bookings</h1>
+                <Link to="/" className="back-link">
+                    Back to Home
+                </Link>
                 <p>Loading your bookings...</p>
             </div>
         );
@@ -77,6 +83,9 @@ function Bookings() {
         return (
             <div className="bookings-page">
                 <h1>My Bookings</h1>
+                <Link to="/" className="back-link">
+                    Back to Home
+                </Link>
                 <p>{error}</p>
             </div>
         );
@@ -85,6 +94,9 @@ function Bookings() {
     return (
         <div className="bookings-page">
             <h1>My Bookings</h1>
+            <Link to="/" className="back-link">
+                Back to Home
+            </Link>
 
             {user && (
                 <p>
